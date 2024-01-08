@@ -11,6 +11,8 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^20.10.6",
+    "ethersjs": "^0.0.1-security",
+    "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }
 }
