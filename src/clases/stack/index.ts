@@ -1,3 +1,4 @@
+import { ethers } from "ethers";
 import { MAX_UINT256 } from "../../constants";
 import { InvalidStackValue, StackOverflow, StackUnderflow } from "./erros";
 
@@ -39,4 +40,9 @@ export  default class Stack {
         return value
     }
 
+    print(){
+        console.log(`Stack: \t`,
+                    this._stack.map(item=>ethers.hexlify(String(item))));
+
+    }
 }

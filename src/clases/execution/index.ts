@@ -1,7 +1,9 @@
 import Memory from "../memory";
 import Stack from "../stack";
 import {ethers} from "ethers";
-import { InvalidBytecode } from "./erros";
+import { InvalidBytecode, InvalidProgramCountexIndex, UnknowOpcode } from "./erros";
+import Instruction from "../instruction";
+import Opcodes from "../../opcodes";
 
 
 export class ExecutionContext {
@@ -15,7 +17,6 @@ export class ExecutionContext {
     constructor(code: string) {
 
         if (!ethers.isHexString(code) || code.length%2 !== 0) {
-
             throw new InvalidBytecode()
         }
 
@@ -33,16 +34,17 @@ export class ExecutionContext {
 
 
     run(){
-        const bytes = this._code.length/2
 
         while (!this._stopped) {
-            if (this._pc>bytes) {
-                break
-            }
-            const opcode = this.readByteFromCode()
-            console.log(opcode);
 
+            const currentPC = this._pc
 
+            const instruction = this.fetchInstruction()
+            instruction.execute(this)
+
+            console.info(`${instruction.name} \t @pc ${currentPC}`)
+            this._memory.print()
+            this._stack.print()
 
         }
     }
@@ -52,6 +54,21 @@ export class ExecutionContext {
         const values = BigInt(ethers.hexlify(hexvalues))
         this._pc+=bytes
         return values
+    }
+
+    private fetchInstruction():Instruction{
+
+        if (this._pc>=this._code.length)  return Opcodes[0]
+
+        if (this._pc<0) throw new InvalidProgramCountexIndex()
+
+        const opcode = this.readByteFromCode(1)
+
+        const instruction = Opcodes[Number(opcode)]
+
+        if (!instruction) throw new UnknowOpcode()
+
+        return instruction
     }
 
 
