@@ -41,7 +41,8 @@ export default class Memory {
 
     print(){
         console.log(`Memory: \t`,
-                    this._memory.map(item=>ethers.hexlify(String(item))));
+                    this._memory.map(item=>ethers.hexlify(`0x${item.toString(16)}`)));
+                    // this._memory.map(item=>ethers.hexlify(String(item))));
 
     }
 }

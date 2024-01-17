@@ -1,27 +1,38 @@
-import { ethers, hexlify } from 'ethers';
-// getBytes es similar a hexlify
+class Person {
+    public name:string;
+    public age:number;
 
-// Ejemplo de entrada en diferentes formatos
-let hexString = '0x1234560aff';
-let array = [1, 35, 69,]; // Array de números
-let byteArray = new Uint8Array([257]);
+    constructor(name:string, age:number) {
+        this.name= name,
+        this.age=age
+    }
 
-// Uso de getBytes que es lo mismo que arrayify
-let bytesFromHexString = ethers.getBytes(hexString);
-// let bytesFromArray = ethers.getBytes(array);
-let bytesFromByteArray = ethers.getBytes(byteArray);
+    getOld(){
+        this.age+=1
+    }
+}
 
-console.log("bytesFromHexString => ",bytesFromHexString, typeof(bytesFromHexString)); // Uint8Array representando el hexString
-// console.log(bytesFromArray);     // Uint8Array representando el array
-console.log("byteArray => ",byteArray, typeof(byteArray))
-console.log("bytesFromByteArray => ",bytesFromByteArray, typeof(bytesFromByteArray)); // Uint8Array original, ya que es una entrada válida
-let arra= [223,34,3,4]
-console.log("typeof(arra) ",typeof(arra));
+let person_C = new Person("David",25)
+person_C.getOld()
 
-console.log("byteArray =>", byteArray);
 
-const hexlifyval = hexlify(byteArray)
-console.log("hexlifyval => ",hexlifyval);
-console.log("hexlifyval => ",typeof hexlifyval);
-console.log("hexlifyval to BigInt => ", BigInt(hexlifyval));
+const person_f = {
+    name: "David",
+    age:25
+}
+
+const getOld_f = (person: {name:string, age:number}) => Object.assign({},
+    person, {age:person.age+1})
+
+getOld_f(person_f)
+
+
+let array = [1,2,3,4,5]
+let array_2 =[]
+
+for (let index = 0; index < array.length; index++) {
+  array_2.push(array[index]*2)
+}
+
+let array_3 = array.map(item=>item*2)
 

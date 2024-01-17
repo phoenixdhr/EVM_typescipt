@@ -13,3 +13,7 @@ export class StackOverflow extends InvalidStackValue {
 export class StackUnderflow extends InvalidStackValue {
 
 }
+
+export class IndexOutOfBonds extends Error{
+    
+}
