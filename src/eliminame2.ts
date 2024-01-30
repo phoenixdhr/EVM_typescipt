@@ -56,21 +56,28 @@
 // console.log(timesTwo(addOne(b)));
 // console.log(b);
 
-import { log } from "console"
-import { ethers } from "ethers"
+import { decToHex0x } from "./metods/decToHex0x";
+
+const _decToHex0x = (num:number,bytes:number) => {
+    const hex = num.toString(16)
+    const len_number = bytes*2
+    const len_Zeros = len_number-hex.length
+    const hex_zeroLeft = "0".repeat(len_Zeros) + hex
+    const hex0x = "0x" + hex_zeroLeft
+    return hex0x
+}
 
 
+console.log(decToHex0x(12,32));
+decToHex0x(12,32)
 
-const code = "0x10101015"
-
-const codew = BigInt("0x10101015")
-console.log(codew);
-
-
-const hex = ethers.getBytes(code)
-
-
-console.log(hex[0]);
-console.log(hex);
-// console.log(hex.push(BigInt(244)));
+// const num = 12;
+// const numhex = num.toString(16)
+// console.log("num =>",num ,"   numhex=> ", numhex, "   numhex.length=> ", numhex.length); // "1b"
+// const len_Zeros = 64-numhex.length
+// console.log("len_Zeros =>",len_Zeros); // "1b"
+// console.log("0.repeat(len) =>", "0".repeat(len_Zeros)); // "1b"
+// const numhex_zeroLeft = "0".repeat(len_Zeros) + numhex
+// console.log("numhex_zeroLeft Len =>",numhex_zeroLeft.length ,"numhex_zeroLeft=> ", numhex_zeroLeft); // "1b"
+// const numHex0x = "0x" + numhex_zeroLeft
 

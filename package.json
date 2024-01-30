@@ -5,15 +5,25 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "dev":"ts-node src"
+    "dev": "ts-node src"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@ethereumjs/trie": "^6.0.1",
+    "@ethereumjs/util": "^9.0.1",
+    "@ethersproject/bytes": "^5.7.0",
+    "@types/level": "^6.0.3",
     "@types/node": "^20.10.6",
+    "abstract-level": "^1.0.4",
     "ethers": "^6.9.2",
+    "level": "^8.0.1",
+    "memory-level": "^1.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "debug": "^4.3.4"
   }
 }

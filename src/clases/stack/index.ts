@@ -1,6 +1,6 @@
-import { ethers } from "ethers";
 import { MAX_UINT256 } from "../../constants";
 import { IndexOutOfBonds, InvalidStackValue, StackOverflow, StackUnderflow } from "./erros";
+import { hexlify } from "@ethersproject/bytes";
 
 export  default class Stack {
 
@@ -11,8 +11,6 @@ export  default class Stack {
         this._maxDetph=maxDetph
         this._stack=[]
     }
-
-
 
     push(value:bigint){
 
@@ -39,9 +37,7 @@ export  default class Stack {
 
     print(){
         console.log(`Stack: \t`,
-                    this._stack.map(item=>`0x${item.toString(16)}`));
-                    // this._stack.map(item=>ethers.hexlify(String(item))));
-
+                    this._stack.map(item=>hexlify(item)));
     }
 
     duplicate(index:number):void    {
@@ -68,8 +64,6 @@ export  default class Stack {
 
         this._stack[this.toStackIndex(indexA)]=value_B
         this._stack[this.toStackIndex(indexB)]=value_A
-
-
     }
 
 }

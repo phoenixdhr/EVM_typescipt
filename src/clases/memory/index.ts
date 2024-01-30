@@ -1,5 +1,5 @@
 
-import { ethers } from "ethers";
+import { hexlify } from "@ethersproject/bytes";
 import { MAX_UINT256 } from "../../constants"
 import { InvalidMemoryOffset, InvalidMemoryValue } from "./erros";
 
@@ -41,7 +41,7 @@ export default class Memory {
 
     print(){
         console.log(`Memory: \t`,
-                    this._memory.map(item=>ethers.hexlify(`0x${item.toString(16)}`)));
+                    this._memory.map(item=>hexlify(`0x${item.toString(16)}`)));
                     // this._memory.map(item=>ethers.hexlify(String(item))));
 
     }

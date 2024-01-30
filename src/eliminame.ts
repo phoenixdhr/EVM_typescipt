@@ -1,38 +1,24 @@
-class Person {
-    public name:string;
-    public age:number;
+// ./examples/basicUsage.ts
 
-    constructor(name:string, age:number) {
-        this.name= name,
-        this.age=age
-    }
+import { Trie } from '@ethereumjs/trie'
+import { bytesToUtf8, MapDB, utf8ToBytes } from '@ethereumjs/util'
+import { Level } from 'level'
+import { LevelDB } from './clases/store/custonLevelDB'
 
-    getOld(){
-        this.age+=1
-    }
+async function test() {
+
+  const db = new LevelDB(new Level('MY_TRIE_DB_LOCATION') as any ) as any;
+  await db.open(); // Asegúrate de abrir la base de datos
+
+  const trie = new Trie({ db: db,
+  useRootPersistence:true})
+  // console.log(await trie.database().db)
+  await trie.put(utf8ToBytes('test'), utf8ToBytes('one'))
+  console.log("ta mate");
+
+  const value = await trie.get(utf8ToBytes('test'))
+  console.log(value ? bytesToUtf8(value) : 'not found')
+
 }
 
-let person_C = new Person("David",25)
-person_C.getOld()
-
-
-const person_f = {
-    name: "David",
-    age:25
-}
-
-const getOld_f = (person: {name:string, age:number}) => Object.assign({},
-    person, {age:person.age+1})
-
-getOld_f(person_f)
-
-
-let array = [1,2,3,4,5]
-let array_2 =[]
-
-for (let index = 0; index < array.length; index++) {
-  array_2.push(array[index]*2)
-}
-
-let array_3 = array.map(item=>item*2)
-
+test()

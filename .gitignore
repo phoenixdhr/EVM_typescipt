@@ -130,3 +130,7 @@ dist
 .pnp.*
 
 build
+
+db
+DATACHAIN
+MY_TRIE_DB_LOCATION

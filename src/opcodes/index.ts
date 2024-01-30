@@ -1,10 +1,11 @@
 
-import { createContext } from "vm";
 import { ExecutionContext } from "../clases/execution";
 import Instruction from "../clases/instruction";
-import { Module } from "module";
-import { ethers, getBytes } from "ethers";
-import { stringify } from "querystring";
+import { arrayify, hexlify } from "@ethersproject/bytes";
+import { decToHex0x } from "../metods/decToHex0x";
+import { setLengthLeft } from "@ethereumjs/util";
+import { log } from "console";
+
 
 const Opcodes:{
     0:Instruction,
@@ -92,10 +93,37 @@ const Opcodes:{
 
 
 
-    0x51: new Instruction(0x51, "MLOAD"),
-    0x52: new Instruction(0x52, "MSTORE"),
-    0x54: new Instruction(0x54, "SLOAD"),
-    0x55: new Instruction(0x55, "SSTORE"),
+    0x51: new Instruction(0x51, "MLOAD", (ctx:ExecutionContext)=>{
+        const offset = ctx._stack.pop()              // Se obtiene el offset del Stack
+        const data_memory = ctx._memory.load(offset) // Se obtiene el dato de la memoria usando el offset
+        ctx._stack.push(data_memory)                 // Se carga el valor obtenido de la memoria (load) y cargarlo con push
+    }),
+
+    0x52: new Instruction(0x52, "MSTORE", (ctx:ExecutionContext)=>{
+        const [offset, value] = [ctx._stack.pop(),ctx._stack.pop()]
+        ctx._memory.store(offset,value)
+    }),
+
+
+    0x54: new Instruction(0x54, "SLOAD",async (ctx:ExecutionContext)=>{
+        const key = ctx._stack.pop()
+        let keyNew=setLengthLeft(arrayify(Number(key)),32)
+
+        const value = await ctx.storage.get(keyNew)
+
+        ctx._stack.push(BigInt(Number(value??"0x00")))
+
+    }),
+
+    0x55: new Instruction(0x55, "SSTORE",async (ctx:ExecutionContext) => {
+        const [key, value] = [ctx._stack.pop(), ctx._stack.pop()]
+
+        let keyNew=setLengthLeft(arrayify(Number(key)),32)
+        await ctx.storage.put(keyNew, arrayify(Number(value)))
+
+    }),
+
+
     0x56: new Instruction(0x56, "JUMP"),
     0x57: new Instruction(0x57, "JUMPI"),
     0x5b: new Instruction(0x5b, "JUMPDEST"),
@@ -364,9 +392,9 @@ const Opcodes:{
         const [offset, size] = [ctx._stack.pop(), ctx._stack.pop()]
         const outputOffset = ctx._memory.load(offset)
         const outputOffsetHex = '0x' + outputOffset.toString(16);
-        const outputHex = ethers.getBytes(outputOffsetHex).slice(0,Number(size))
+        const outputHex = arrayify(outputOffsetHex).slice(0,Number(size))
         // const va =getBytes(stringify(value))
-        ctx.output=BigInt(ethers.hexlify(outputHex))
+        ctx.output=BigInt(hexlify(outputHex))
     }),
 }
 
