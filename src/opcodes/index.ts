@@ -124,9 +124,17 @@ const Opcodes:{
     }),
 
 
-    0x56: new Instruction(0x56, "JUMP"),
-    0x57: new Instruction(0x57, "JUMPI"),
-    0x5b: new Instruction(0x5b, "JUMPDEST"),
+    0x56: new Instruction(0x56, "JUMP", (ctx:ExecutionContext)=>{
+        const destination = ctx._stack.pop()
+        ctx.jump(destination)
+    }),
+
+    0x57: new Instruction(0x57, "JUMPI", (ctx:ExecutionContext)=>{
+        const [destination, condition] = [ctx._stack.pop(), ctx._stack.pop()]
+        if (condition) ctx.jump(destination)
+    }),
+
+    0x5b: new Instruction(0x5b, "JUMPDEST", ()=>undefined),
 
 
     0x60: new Instruction(0x60, "PUSH1", (ctx:ExecutionContext)=>{

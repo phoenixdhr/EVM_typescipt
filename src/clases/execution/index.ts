@@ -57,7 +57,7 @@ export class ExecutionContext {
         console.log(`Hash Root BD: \t ${hexlify(this.storage.root())} `);
     }
 
-    readByteFromCode(bytes=1):bigint{
+        readByteFromCode(bytes=1):bigint{
         const hexvalues= this._code.slice(this._pc,this._pc+bytes)
         const values = BigInt(hexlify(hexvalues))
         this._pc+=bytes
@@ -80,5 +80,16 @@ export class ExecutionContext {
     }
 
 
-}
+    jump(pc_destination:bigint) {
+        if (!this.isValidJumpDestination(Number(pc_destination)))  throw new InvalidProgramCountexIndex()
+        this._pc=Number(pc_destination)
+    }
 
+    private isValidJumpDestination(pc_destination:number):boolean{
+        console.log("this._code[pc_destination] ==> ",this._code[Number(pc_destination)]);
+        console.log("Opcodes[0x5b]?.opcode ==> ",Opcodes[0x5b]?.opcode);
+
+
+       return this._code[pc_destination-1]==Opcodes[0x5b]?.opcode
+    }
+}
