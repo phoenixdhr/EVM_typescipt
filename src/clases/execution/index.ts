@@ -1,6 +1,6 @@
 import Memory from "../memory";
 import Stack from "../stack";
-import { InvalidBytecode, InvalidProgramCountexIndex, UnknowOpcode } from "./erros";
+import { GasInsuficiente, InvalidBytecode, InvalidProgramCountexIndex, UnknowOpcode } from "./erros";
 import Instruction from "../instruction";
 import Opcodes from "../../opcodes";
 import {Trie} from '@ethereumjs/trie';
@@ -16,9 +16,10 @@ export class ExecutionContext {
     private _stopped: boolean;
     public output:bigint;
     public storage:Trie;
+    public gas:bigint;
 
 
-    constructor(code: string, storage: Trie) {
+    constructor(code: string,  storage: Trie, gas:bigint= BigInt(21000)) {
 
         if (!isHexString(code) || code.length%2 !== 0) {
             throw new InvalidBytecode()
@@ -31,6 +32,13 @@ export class ExecutionContext {
         this._stopped = false
         this.output=BigInt(0)
         this.storage=storage
+        this.gas=gas
+
+    }
+
+    usegas(fee:number){
+        this.gas-=BigInt(fee)
+        if (this.gas<BigInt(0))  throw new GasInsuficiente()
     }
 
 
@@ -46,9 +54,11 @@ export class ExecutionContext {
             const currentPC = this._pc
 
             const instruction = this.fetchInstruction()
-            await instruction.execute(this)
+            const currentAvaiableGas = this.gas
+            const {gasFee}=await instruction.execute(this)
 
-            console.info(`${instruction.name} \t @pc ${currentPC}`)
+
+            console.info(`${instruction.name} \t @pc ${currentPC} \t gas=${currentAvaiableGas} \t cost= ${gasFee} gas`)
             this._memory.print()
             this._stack.print()
         }
