@@ -5,18 +5,20 @@ import Instruction from "../instruction";
 import Opcodes from "../../opcodes";
 import {Trie} from '@ethereumjs/trie';
 import { arrayify, hexlify, isHexString } from "@ethersproject/bytes";
-
+import AccessSet  from "../AccessSet";
 
 export class ExecutionContext {
 
     public _stack: Stack;
     public _memory: Memory;
+    public _AccessSet:AccessSet;
     private readonly _code: Uint8Array;
     private _pc:number;
     private _stopped: boolean;
     public output:bigint;
     public storage:Trie;
     public gas:bigint;
+
 
 
     constructor(code: string,  storage: Trie, gas:bigint= BigInt(21000)) {
@@ -27,6 +29,7 @@ export class ExecutionContext {
 
         this._stack = new Stack();
         this._memory = new Memory();
+        this._AccessSet= new AccessSet();
         this._pc = 0
         this._code = arrayify(code) // arrayify
         this._stopped = false
@@ -77,11 +80,9 @@ export class ExecutionContext {
     private fetchInstruction():Instruction{
 
         if (this._pc>=this._code.length)  return Opcodes[0] // deberia usar la funcion stop()
-
         if (this._pc<0) throw new InvalidProgramCountexIndex()
 
         const opcode = this.readByteFromCode(1)
-
         const instruction = Opcodes[Number(opcode)]
 
         if (!instruction) throw new UnknowOpcode()
@@ -99,7 +100,8 @@ export class ExecutionContext {
         console.log("this._code[pc_destination] ==> ",this._code[Number(pc_destination)]);
         console.log("Opcodes[0x5b]?.opcode ==> ",Opcodes[0x5b]?.opcode);
 
-
        return this._code[pc_destination-1]==Opcodes[0x5b]?.opcode
     }
+
+
 }

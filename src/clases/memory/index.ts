@@ -5,7 +5,7 @@ import { InvalidMemoryOffset, InvalidMemoryValue } from "./erros";
 
 
 export default class Memory {
-    private _memory:bigint[]
+    public _memory:bigint[]
 
     constructor() {
         this._memory=[]
@@ -35,7 +35,7 @@ export default class Memory {
             return BigInt(0)
         }
 
-        return this._memory[Number(offset)]
+        return value
     }
 
 
@@ -45,4 +45,28 @@ export default class Memory {
                     // this._memory.map(item=>ethers.hexlify(String(item))));
 
     }
+
+
+
+    memorycost (len:bigint):bigint{
+
+        const memory_byte_size:bigint = len*32n
+        const memory_size_word:bigint = (memory_byte_size +31n) /32n
+        const memory_cost:bigint = (memory_size_word**2n) /512n +(3n*memory_size_word)
+
+        return memory_cost
+    }
+
+    memory_expansion_cost (offset:bigint):bigint{
+        // memory_expansion_cost = new_memory_cost - last_memory_cost
+        const len_memory = BigInt(this._memory.length)
+        const new_memory_cost:bigint = this.memorycost(offset +1n)
+        const last_memory_cost:bigint = this.memorycost(len_memory)
+        const memory_expansion_cost = new_memory_cost - last_memory_cost
+
+        return memory_expansion_cost<0?BigInt(0):memory_expansion_cost
+    }
+
+
+
 }

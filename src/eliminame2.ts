@@ -1,13 +1,8 @@
-import internal from "stream";
+import { arrayify } from "@ethersproject/bytes"
 
-const sec =(a:number,b:number) => a+b
+let obj:Map<Uint8Array, Uint8Array> = new Map()
 
-const main =sec
+obj.set( arrayify(55), arrayify(550))
 
-const main2 = async (a:number,b:number) => {return await main(a,b)}
 
-// Set the module and target options
-// console.log("main2(1,2) ", await main2(1,2))
-main2(1,2).then((val)=>{console.log("main2(1,2) ", val)})
-// (async()=>{console.log("main2(1,2) ", await main2(1,2))})()
-
+console.log(obj.get(arrayify(55))) // Uint8Array [ 0x02, 0x26 ]

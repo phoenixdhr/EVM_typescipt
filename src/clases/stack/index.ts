@@ -49,21 +49,35 @@ export  default class Stack {
         this._stack.push(value)
     }
 
+    // el indice 1 es el tope de la pila (this._stack.length-1)
+    // el indice 2 es el segundo elemento por debajo del tope de la pila (this._stack.length-2)
     toStackIndex(index:number){
-        const newIndex = this._stack.length-1
+        const newIndex = this._stack.length-index
         return newIndex
     }
 
 
     swap(indexA:number, indexB:number){
-        const value_A = this._stack[this.toStackIndex(indexA)]
-        const value_B = this._stack[this.toStackIndex(indexB)]
+        const value_A = this.getAtIndex(indexA)
+        const value_B = this.getAtIndex(indexB)
 
-        if (value_A==undefined) throw new IndexOutOfBonds()
-        if (value_B==undefined) throw new IndexOutOfBonds()
+        this.setAtIndex(indexA,value_B)
+        this.setAtIndex(indexB,value_A)
 
-        this._stack[this.toStackIndex(indexA)]=value_B
-        this._stack[this.toStackIndex(indexB)]=value_A
     }
+
+    setAtIndex(index: number, value:bigint){
+        const adjustIndex = this.toStackIndex(index)
+        this._stack[adjustIndex]=value
+    }
+
+    getAtIndex(index: number):bigint{
+        const adjustIndex = this.toStackIndex(index)
+        const value = this._stack[adjustIndex]
+
+        if (value==undefined )throw new IndexOutOfBonds()
+        return value
+    }
+
 
 }

@@ -1,10 +1,8 @@
-
 import { ExecutionContext } from "../clases/execution";
 import Instruction from "../clases/instruction";
 import { arrayify, hexlify } from "@ethersproject/bytes";
-import { decToHex0x } from "../metods/decToHex0x";
 import { setLengthLeft } from "@ethereumjs/util";
-import { log } from "console";
+
 
 
 const Opcodes:{
@@ -39,7 +37,16 @@ const Opcodes:{
         ctx._stack.push(result)}
         ),
 
-    0x0a: new Instruction(0x0a, "EXP", async (ctx:ExecutionContext)=>1, (ctx:ExecutionContext)=>{
+    0x0a: new Instruction(0x0a, "EXP", async (ctx:ExecutionContext)=>{
+        const staticGas  =10
+
+        const exponente = ctx._stack.getAtIndex(2)
+        const sizeExponente = arrayify(Number(exponente)).length
+        const dynamicGas = sizeExponente*50
+
+        const totalFee = staticGas   + dynamicGas
+        return totalFee
+    }, (ctx:ExecutionContext)=>{
         const [a, exponent]=[ctx._stack.pop(), ctx._stack.pop()]
         ctx._stack.push(a**exponent)
     }),
@@ -80,46 +87,77 @@ const Opcodes:{
         ctx._stack.push(result)
     }),
 
+
     0x19: new Instruction(0x19, "NOT",3,(ctx:ExecutionContext)=>{
         const a=ctx._stack.pop()
         const result = BigInt(!a)
         ctx._stack.push(result)
     }),
 
+
     0x50: new Instruction(0x50, "POP",3,(ctx:ExecutionContext)=>{
         ctx._stack.pop()
     }),
 
 
+    0x51: new Instruction(0x51, "MLOAD",
+        async(ctx:ExecutionContext)=>{
+            const offset = ctx._stack.getAtIndex(1)
+            const memory_expansion_cost = ctx._memory.memory_expansion_cost(offset)
 
+            const static_gas = 3
+            const dynamic_gas = Number(memory_expansion_cost)
+            return static_gas + dynamic_gas
 
-    0x51: new Instruction(0x51, "MLOAD", async()=>1, (ctx:ExecutionContext)=>{
-        const offset = ctx._stack.pop()              // Se obtiene el offset del Stack
-        const data_memory = ctx._memory.load(offset) // Se obtiene el dato de la memoria usando el offset
-        ctx._stack.push(data_memory)                 // Se carga el valor obtenido de la memoria (load) y cargarlo con push
+    }, (ctx:ExecutionContext)=>{
+            const offset = ctx._stack.pop()              // Se obtiene el offset del Stack
+            const data_memory = ctx._memory.load(offset) // Se obtiene el dato de la memoria usando el offset
+            ctx._stack.push(data_memory)                 // Se carga el valor obtenido de la memoria (load) y cargarlo con push
     }),
 
-    0x52: new Instruction(0x52, "MSTORE", async()=>1,(ctx:ExecutionContext)=>{
-        const [offset, value] = [ctx._stack.pop(),ctx._stack.pop()]
-        ctx._memory.store(offset,value)
+
+    0x52: new Instruction(0x52, "MSTORE",
+        async(ctx:ExecutionContext)=>{
+            const offset = ctx._stack.getAtIndex(1)
+            const memory_expansion_cost = ctx._memory.memory_expansion_cost(offset)
+
+            const static_gas = 3
+            const dynamic_gas = Number(memory_expansion_cost)
+            return static_gas + dynamic_gas
+    },
+
+        (ctx:ExecutionContext)=>{
+            const [offset, value] = [ctx._stack.pop(),ctx._stack.pop()]
+            ctx._memory.store(offset,value)
+        }),
+
+
+    0x54: new Instruction(0x54, "SLOAD",
+        async(ctx:ExecutionContext)=>{
+            const key = ctx._stack.getAtIndex(1)
+            const value = ctx._AccessSet.load(key)
+            return value?  100: 2100
+    },
+        async (ctx:ExecutionContext)=>{
+            const key = ctx._stack.pop()
+            let keyNew=setLengthLeft(arrayify(Number(key)),32)
+            const value = await ctx.storage.get(keyNew)
+
+            ctx._stack.push(BigInt(Number(value??"0x00")))
+            value? ctx._AccessSet.store(key, BigInt(Number(value))):ctx._AccessSet.store(key, BigInt(0)) // Almacena el valor en el AccessSet
+
     }),
 
+    0x55: new Instruction(0x55, "SSTORE", async()=>1,
 
-    0x54: new Instruction(0x54, "SLOAD",async()=>1, async (ctx:ExecutionContext)=>{
-        const key = ctx._stack.pop()
-        let keyNew=setLengthLeft(arrayify(Number(key)),32)
-
-        const value = await ctx.storage.get(keyNew)
-
-        ctx._stack.push(BigInt(Number(value??"0x00")))
-
-    }),
-
-    0x55: new Instruction(0x55, "SSTORE", async()=>1, async (ctx:ExecutionContext) => {
+    async (ctx:ExecutionContext) => {
         const [key, value] = [ctx._stack.pop(), ctx._stack.pop()]
-
         let keyNew=setLengthLeft(arrayify(Number(key)),32)
+
         await ctx.storage.put(keyNew, arrayify(Number(value)))
+
+        ctx._AccessSet.store(key, value) // Almacena el valor en el AccessSet
+        const valval = ctx._AccessSet.load(key)
 
     }),
 
