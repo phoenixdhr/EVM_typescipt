@@ -12,6 +12,7 @@ export default class Memory {
     }
 
     store(offset:bigint, value:bigint){
+
         if (offset<0 || offset>MAX_UINT256) {
             throw new InvalidMemoryOffset(offset,value)
         }
@@ -19,7 +20,6 @@ export default class Memory {
         if (value<0 || value>MAX_UINT256) {
             throw new InvalidMemoryValue(offset,value)
         }
-
         this._memory[Number(offset)]=value
     }
 
@@ -40,10 +40,7 @@ export default class Memory {
 
 
     print(){
-        console.log(`Memory: \t`,
-                    this._memory.map(item=>hexlify(`0x${item.toString(16)}`)));
-                    // this._memory.map(item=>ethers.hexlify(String(item))));
-
+        console.log(`Memory: \t`, this._memory.map(item=>hexlify(Number(item))));
     }
 
 

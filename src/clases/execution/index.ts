@@ -60,13 +60,14 @@ export class ExecutionContext {
 
             const instruction = this.fetchInstruction()
             const currentAvaiableGas = this.gas
-            const {gasFee}=await instruction.execute(this)
-
+            const {gasFee}= await instruction.execute(this)
 
             console.info(`${instruction.name} \t @pc ${currentPC} \t gas=${currentAvaiableGas} \t cost= ${gasFee} gas`)
-            this._memory.print()
+
             this._stack.print()
+            this._memory.print()
         }
+
         const hexString = `0x${this.output.toString(16)}`;
         console.log(`Output: \t ${hexString}`);
         console.log(`Hash Root BD: \t ${hexlify(this.storage.root())} `);
@@ -102,7 +103,7 @@ export class ExecutionContext {
         console.log("this._code[pc_destination] ==> ",this._code[Number(pc_destination)]);
         console.log("Opcodes[0x5b]?.opcode ==> ",Opcodes[0x5b]?.opcode);
 
-       return this._code[pc_destination-1]==Opcodes[0x5b]?.opcode
+        return this._code[pc_destination-1]==Opcodes[0x5b]?.opcode // Se resta -1, pero esto depende de como se implemente la EVM e influye en los valores que se ingresen como opdode
     }
 
 

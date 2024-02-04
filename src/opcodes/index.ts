@@ -2,6 +2,7 @@ import { ExecutionContext } from "../clases/execution";
 import Instruction from "../clases/instruction";
 import { arrayify, hexlify } from "@ethersproject/bytes";
 import { setLengthLeft } from "@ethereumjs/util";
+import { log } from "console";
 
 
 
@@ -207,7 +208,8 @@ const Opcodes:{
         if (condition) ctx.jump(destination)
     }),
 
-    0x5b: new Instruction(0x5b, "JUMPDEST", 1, ()=>undefined),
+    0x5b: new Instruction(0x5b, "JUMPDEST", 1, ()=>{console.log("fvfd");
+    }),
 
 
     0x60: new Instruction(0x60, "PUSH1",3, (ctx:ExecutionContext)=>{
