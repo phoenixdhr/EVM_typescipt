@@ -148,7 +148,42 @@ const Opcodes:{
 
     }),
 
-    0x55: new Instruction(0x55, "SSTORE", async()=>1,
+    0x55: new Instruction(0x55, "SSTORE", async(ctx:ExecutionContext)=>{
+        const [key, value] = [ctx._stack.getAtIndex(1), ctx._stack.getAtIndex(2)]
+        let keyNew=setLengthLeft(arrayify(Number(key)),32)
+        const storeValue = await ctx.storage.get(keyNew)
+        const current_value = storeValue? BigInt(Number(storeValue)) : BigInt(0)
+
+        const storeOriginalValue = await ctx.originalStorage.get(keyNew)
+        const original_value = storeOriginalValue? BigInt(Number(storeOriginalValue)) : BigInt(0)
+
+        const getDynamicGAs =()=>{
+            if (value == current_value){
+                // Si el valor a almacenar es igual al valor actual, el costo es mínimo.
+                return 100
+            }
+
+            else if (current_value == original_value){
+                if(original_value == BigInt(0)){
+                    // Costo elevado para almacenar un nuevo valor no cero en un slot previamente vacío.
+                    return 20000
+                }
+                else{
+                    // Costo moderado para cambiar un valor no cero que no ha sido
+                    return 2900
+                }
+            }
+
+            else{
+                // Costo estándar para la modificación de valores.
+                // El valor a almacenar es diferente al valor actual y el valor actual es diferente al valor original.
+                return 100
+            }
+        }
+
+
+        return getDynamicGAs() + (storeValue===null?2100:0)
+    },
 
     async (ctx:ExecutionContext) => {
         const [key, value] = [ctx._stack.pop(), ctx._stack.pop()]
@@ -434,7 +469,16 @@ const Opcodes:{
 
 
 
-    0xf3: new Instruction(0xf3, "RETURN", async()=>1, (ctx:ExecutionContext)=>{
+    0xf3: new Instruction(0xf3, "RETURN",
+     async(ctx:ExecutionContext)=>{
+        const offset = ctx._stack.getAtIndex(1)
+        const memory_expansion_cost = ctx._memory.memory_expansion_cost(offset)
+
+        const dynamic_gas = Number(memory_expansion_cost)
+        return dynamic_gas
+
+    },
+    (ctx:ExecutionContext)=>{
         const [offset, size] = [ctx._stack.pop(), ctx._stack.pop()]
         const outputOffset = ctx._memory.load(offset)
         const outputOffsetHex = '0x' + outputOffset.toString(16);

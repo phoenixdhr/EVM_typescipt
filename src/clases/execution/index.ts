@@ -17,6 +17,7 @@ export class ExecutionContext {
     private _stopped: boolean;
     public output:bigint;
     public storage:Trie;
+    public readonly originalStorage:Trie;
     public gas:bigint;
 
 
@@ -35,6 +36,7 @@ export class ExecutionContext {
         this._stopped = false
         this.output=BigInt(0)
         this.storage=storage
+        this.originalStorage=storage.shallowCopy()
         this.gas=gas
 
     }
